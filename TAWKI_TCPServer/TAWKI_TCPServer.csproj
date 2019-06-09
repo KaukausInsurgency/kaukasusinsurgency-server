@@ -69,6 +69,7 @@
     <Compile Include="ConfigReader.cs" />
     <Compile Include="EDBSource.cs" />
     <Compile Include="GlobalConfig.cs" />
+    <Compile Include="Implementations\ConsoleLogger.cs" />
     <Compile Include="Implementations\CurrentTime.cs" />
     <Compile Include="Implementations\FileLogger.cs" />
     <Compile Include="Implementations\InvalidProcessMessageStrategy.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="SocketClient.cs" />
     <Compile Include="SqlUtility.cs" />
     <Compile Include="ThrottleMapper.cs" />
+    <Compile Include="UpdateMetaVersion.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

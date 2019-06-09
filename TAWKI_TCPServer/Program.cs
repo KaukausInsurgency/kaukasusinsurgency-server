@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TAWKI_TCPServer.Implementations;
 using TAWKI_TCPServer.Interfaces;
 
 namespace TAWKI_TCPServer
@@ -46,48 +47,65 @@ namespace TAWKI_TCPServer
 
             GlobalConfig.SetConfig(cr);
 
-            Console.WriteLine("Attempting To Connect to MySQL database...");
-            MySql.Data.MySqlClient.MySqlConnection test_connection = new MySql.Data.MySqlClient.MySqlConnection(cr.MySQLDBConnect);
-            try
             {
-                test_connection.Open();
-                Console.WriteLine("Successful Connection to MySQL Database " + test_connection.Database);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed To Connect to MySQL Database - " + ex.Message);
-            }
-            finally
-            {
-                if (test_connection != null)
-                    if (test_connection.State == System.Data.ConnectionState.Open 
-                        || test_connection.State == System.Data.ConnectionState.Connecting)
-                        test_connection.Close();
+                Console.WriteLine("Attempting To Connect to MySQL database...");
+                MySql.Data.MySqlClient.MySqlConnection test_connection = new MySql.Data.MySqlClient.MySqlConnection(cr.MySQLDBConnect);
+                try
+                {
+                    test_connection.Open();
+                    Console.WriteLine("Successful Connection to MySQL Database " + test_connection.Database);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed To Connect to MySQL Database - " + ex.Message);
+                    Console.ReadKey();
+                    return;
+                }
+                finally
+                {
+                    if (test_connection != null)
+                        if (test_connection.State == System.Data.ConnectionState.Open
+                            || test_connection.State == System.Data.ConnectionState.Connecting)
+                            test_connection.Close();
+                }
+            }       
 
-                test_connection = null;
+            {
+                Console.WriteLine("Attempting to Connect to Redis database...");
+                ConnectionMultiplexer test_redis_connection = null;
+                try
+                {
+                    test_redis_connection = ConnectionMultiplexer.Connect(cr.RedisDBConnect);
+                    Console.WriteLine("Successful Connection to Redis Database");
+                    Console.WriteLine("Redis Environment: " + cr.RedisEnvironmentKey);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed To Connect to Redis Database - " + ex.Message);
+                    Console.ReadKey();
+                    return;
+                }
+                finally
+                {
+                    if (test_redis_connection != null)
+                        if (test_redis_connection.IsConnected)
+                            test_redis_connection.Close();
+                }
             }
+            
 
-            Console.WriteLine("Attempting to Connect to Redis database...");
-            ConnectionMultiplexer test_redis_connection = null;
-            try
             {
-                test_redis_connection = ConnectionMultiplexer.Connect(cr.RedisDBConnect);
-                Console.WriteLine("Successful Connection to Redis Database");
-                Console.WriteLine("Redis Environment: " + cr.RedisEnvironmentKey);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed To Connect to Redis Database - " + ex.Message);
-                Console.ReadKey();
-                return;
-            }
-            finally
-            {
-                if (test_redis_connection != null)
-                    if (test_redis_connection.IsConnected)
-                        test_redis_connection.Close();
-            }
+                Console.WriteLine("Updating database version info");
+                MySql.Data.MySqlClient.MySqlConnection version_update_connection = new MySql.Data.MySqlClient.MySqlConnection(cr.MySQLDBConnect);
+                UpdateMetaVersion updateMetaVersion = new UpdateMetaVersion(version_update_connection, new ConsoleLogger());
 
+                if (!updateMetaVersion.UpdateVersionInfo())
+                {
+                    Console.WriteLine("Failed to update version info because of an error");
+                    return;
+                }             
+            }
+            
             string PublicIP = "";
             if (cr.UseUPnP)
             {

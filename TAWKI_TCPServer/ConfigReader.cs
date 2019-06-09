@@ -24,8 +24,8 @@ namespace TAWKI_TCPServer
         private Dictionary<string, RedisAction> _redisActionKeyPair;
         private Dictionary<string, long> _actionThrottle;
         private string _redisEnvironmentKey;
-        private string _version;
-        private string _versionKey;
+        private static string _version = "0.9";
+        private static string _versionKey = "f9739393-4c12-4108-976e-492fb76e9c34";
 
         public ConfigReader()
         {
@@ -46,8 +46,6 @@ namespace TAWKI_TCPServer
                 XmlNodeList actionkeysxml = xml.SelectNodes("/Config/RedisActionKeys/Pair");
                 XmlNodeList supportedHTMLxml = xml.GetElementsByTagName("SupportedHTML");
                 XmlNodeList redisEnvironmentxml = xml.GetElementsByTagName("RedisEnvironmentKey");
-                XmlNodeList versionxml = xml.GetElementsByTagName("Version");
-                XmlNodeList versionkeyxml = xml.GetElementsByTagName("VersionKey");
                 XmlNodeList actionthrottlexml = xml.SelectNodes("/Config/Throttle/Action");
 
                 if (dbxml.Count == 0)
@@ -60,10 +58,6 @@ namespace TAWKI_TCPServer
                     throw new Exception("Could not find <RedisDBConnect> in config");
                 if (redisEnvironmentxml.Count == 0)
                     throw new Exception("Could not find <RedisEnvironmentKey> in config");
-                if (versionxml.Count == 0)
-                    throw new Exception("Could not find <Version> in config");
-                if (versionkeyxml.Count == 0)
-                    throw new Exception("Could not find <VersionKey> in config");
                 if (whitelistxml.Count == 0)
                     _useWhiteList = false;
                 else
@@ -120,9 +114,6 @@ namespace TAWKI_TCPServer
                 }
 
                 _redisEnvironmentKey = redisEnvironmentxml[0].InnerText;
-                _version = versionxml[0].InnerText;
-                _versionKey = versionkeyxml[0].InnerText;
-
                 _configReadSuccess = true;
             }
             catch (Exception ex)
